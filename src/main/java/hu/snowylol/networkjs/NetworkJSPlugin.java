@@ -1,15 +1,15 @@
 package hu.snowylol.networkjs;
 
-import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
-import dev.latvian.mods.kubejs.script.BindingRegistry;
+import dev.latvian.mods.kubejs.KubeJSPlugin;
+import dev.latvian.mods.kubejs.script.BindingsEvent;
 import hu.snowylol.networkjs.FetchBinding.FetchOptions;
 
 import java.util.Map;
 
-public class NetworkJSPlugin implements KubeJSPlugin {
-    
+public class NetworkJSPlugin extends KubeJSPlugin {
+
     @Override
-    public void registerBindings(BindingRegistry bindings) {
+    public void registerBindings(BindingsEvent bindings) {
         NetworkJS.LOGGER.info("Registering NetworkJS bindings...");
         
         bindings.add("fetch", (FetchFunction) (url, options) -> {
