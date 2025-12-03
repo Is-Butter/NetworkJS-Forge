@@ -52,6 +52,8 @@ fetchAsync('https://api.example.com/data', {
 - `headers` – Map/object of header key/value pairs. `Content-Type` is auto-detected from the header when present (defaults to `application/json`).
 - `body` – Any value that can be stringified; used as the request body when the method accepts one.
 
+> **Important**: All fetch fields are coerced to Java strings before building the HTTP request to avoid Rhino `ConsString` casting issues. Non-string methods, header keys/values, and bodies are passed through `String.valueOf()`/`toString()`, so ensure your objects implement a meaningful string representation if you rely on custom types.
+
 #### Fetch response helpers
 
 - `getStatus()` / `status` – Numeric HTTP status code.

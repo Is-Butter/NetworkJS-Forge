@@ -26,6 +26,14 @@ public class NetworkJSPlugin extends KubeJSPlugin {
         NetworkJS.logInfo("NetworkJS bindings registered successfully");
     }
 
+    /**
+     * Normalizes script-provided fetch arguments into safe Java types before delegating to {@link FetchBinding}.
+     * <p>
+     * Rhino often wraps string literals in {@code ConsString}, which can trigger {@link ClassCastException}s when
+     * passed directly to OkHttp. To avoid that, this method stringifies the URL, HTTP method, header keys/values,
+     * and leaves the body as a raw object so {@link FetchOptions} can convert it using {@link Object#toString()} when
+     * constructing the request body.
+     */
     private static Object handleFetch(String url, Object options, boolean async) {
         if (url == null || url.isEmpty()) {
             throw new IllegalArgumentException("URL is required for fetch calls");
@@ -34,11 +42,22 @@ public class NetworkJSPlugin extends KubeJSPlugin {
         if (options instanceof Map<?, ?> opts) {
             @SuppressWarnings("unchecked")
             Map<String, Object> optMap = (Map<String, Object>) opts;
-            FetchOptions javaOptions = new FetchOptions(
-                (String) optMap.getOrDefault("method", "GET"),
-                (Map<String, String>) optMap.getOrDefault("headers", Map.of()),
-                optMap.getOrDefault("body", null)
-            );
+
+            String method = String.valueOf(optMap.getOrDefault("method", "GET"));
+
+            Map<String, String> headers = Map.of();
+            Object rawHeaders = optMap.get("headers");
+            if (rawHeaders instanceof Map<?, ?> headerMap) {
+                java.util.HashMap<String, String> normalized = new java.util.HashMap<>();
+                for (Map.Entry<?, ?> entry : headerMap.entrySet()) {
+                    normalized.put(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
+                }
+                headers = normalized;
+            }
+
+            Object rawBody = optMap.getOrDefault("body", null);
+
+            FetchOptions javaOptions = new FetchOptions(method, headers, rawBody);
             return async ? FetchBinding.fetchAsync(url, javaOptions) : FetchBinding.fetch(url, javaOptions);
         }
 
