@@ -137,6 +137,38 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 
 sourceSets.main.resources.srcDir generateModMetadata
 
+// Validate that every dependency declared in mods.toml has the required fields
+// before the resources are packaged into the jar. This prevents publishing
+// malformed metadata such as dependency entries without the mandatory flag.
+def validateModMetadata = tasks.register("validateModMetadata") {
+    dependsOn generateModMetadata
+    def generatedModsToml = layout.buildDirectory.file("generated/sources/modMetadata/META-INF/mods.toml")
+    inputs.file(generatedModsToml)
+    doLast {
+        def modsToml = generatedModsToml.get().asFile
+        if (!modsToml.exists()) {
+            throw new GradleException("Generated mods.toml was not found at ${modsToml}")
+        }
+
+        def content = modsToml.text
+        def missingMandatory = []
+
+        content.split(/\[\[dependencies\./).drop(1).each { block ->
+            def dependencyBlock = "[[dependencies.${block}"
+            if (!dependencyBlock.contains("mandatory")) {
+                missingMandatory << dependencyBlock
+            }
+        }
+
+        if (!missingMandatory.isEmpty()) {
+            throw new GradleException("mods.toml dependencies are missing the mandatory field: ${missingMandatory.join('; ')}")
+        }
+    }
+}
+
+tasks.named("processResources").configure { dependsOn validateModMetadata }
+tasks.named("shadowJar").configure { dependsOn validateModMetadata }
+
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
