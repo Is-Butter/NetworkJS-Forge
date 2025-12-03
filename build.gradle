@@ -213,6 +213,12 @@ shadowJar {
     }
 }
 
+// Create a reobfuscation task for the shaded jar so assemble/build can depend on
+// it without failing when the task would otherwise be missing.
+reobf {
+    shadowJar {}
+}
+
 tasks.jar.configure { enabled = false }
 
 // Reobfuscate the shaded jar instead of the default jar task, which is disabled
@@ -226,8 +232,13 @@ afterEvaluate {
     }
 }
 
-// Use shadowJar as the main artifact
-tasks.assemble.dependsOn tasks.shadowJar
+// Ensure the distributed artifact is always reobfuscated.
+// Depending only on shadowJar would produce a dev-named jar that crashes on a
+// production (obfuscated) environment. Tie assemble to the reobfuscated shadow
+// jar so running `./gradlew assemble` or `./gradlew build` always emits a
+// production-safe jar.
+tasks.named('reobfShadowJar').configure { dependsOn tasks.shadowJar }
+tasks.assemble.dependsOn tasks.named('reobfShadowJar')
 
 idea {
     module {
