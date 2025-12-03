@@ -175,14 +175,9 @@ shadowJar {
 }
 
 tasks.jar.configure { enabled = false }
-tasks.build.dependsOn tasks.shadowJar
 
-tasks.register('reobfShadowJar', net.minecraftforge.gradle.common.tasks.ReobfJar) {
-    input.set(tasks.shadowJar.get().archiveFile)
-}
-
-tasks.reobfShadowJar.configure { mustRunAfter tasks.shadowJar }
-tasks.build.dependsOn tasks.reobfShadowJar
+// Use shadowJar as the main artifact
+tasks.assemble.dependsOn tasks.shadowJar
 
 idea {
     module {
