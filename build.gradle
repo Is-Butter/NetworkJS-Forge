@@ -93,7 +93,6 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
-    runtimeOnly fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
 
     shadow "com.squareup.okhttp3:okhttp:4.12.0"
     shadow "com.google.code.gson:gson:2.10.1"
