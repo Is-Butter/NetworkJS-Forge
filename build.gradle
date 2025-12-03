@@ -93,24 +93,12 @@ dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
+    implementation fg.deobf("dev.latvian.mods:rhino-forge:2001.2.2-build.17")
 
     shadow "com.squareup.okhttp3:okhttp:4.12.0"
     shadow "com.google.code.gson:gson:2.10.1"
     shadow "com.squareup.okio:okio:3.6.0"
 
-    shadow("net.dv8tion:JDA:5.1.2") {
-        exclude group: 'org.slf4j'
-        exclude group: 'ch.qos.logback'
-        exclude group: 'net.java.dev.jna'
-        exclude group: 'com.sun.jna'
-        exclude group: 'com.google.code.findbugs'
-        exclude group: 'javax.annotation'
-        exclude group: 'org.jetbrains'
-        exclude group: 'com.google.errorprone'
-        exclude group: 'com.google.guava'
-    }
-
-    shadow("org.apache.commons:commons-collections4:4.4")
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -195,12 +183,6 @@ shadowJar {
     relocate 'com.google.gson', 'hu.snowylol.networkjs.libs.gson'
     relocate 'okhttp3', 'hu.snowylol.networkjs.libs.okhttp3'
     relocate 'okio', 'hu.snowylol.networkjs.libs.okio'
-    relocate 'net.dv8tion.jda', 'hu.snowylol.networkjs.libs.jda'
-    relocate 'com.sun.jna', 'hu.snowylol.networkjs.libs.jna'
-    relocate 'javax.annotation', 'hu.snowylol.networkjs.libs.annotations'
-    relocate 'com.google.errorprone', 'hu.snowylol.networkjs.libs.errorprone'
-    relocate 'com.fasterxml.jackson', 'hu.snowylol.networkjs.libs.jackson'
-    relocate 'org.apache.commons.collections4', 'hu.snowylol.networkjs.libs.collections4'
 
     exclude 'META-INF/maven/**'
     exclude 'META-INF/*.SF'
