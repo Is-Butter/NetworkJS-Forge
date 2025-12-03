@@ -126,7 +126,8 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_license            : mod_license,
             mod_version            : mod_version,
             mod_authors            : mod_authors,
-            mod_description        : mod_description
+            mod_description        : mod_description,
+            kubejs_version         : kubejs_version
     ]
     inputs.properties replaceProperties
     expand replaceProperties
@@ -174,6 +175,17 @@ shadowJar {
 }
 
 tasks.jar.configure { enabled = false }
+
+// Reobfuscate the shaded jar instead of the default jar task, which is disabled
+afterEvaluate {
+    tasks.findByName('reobfJar')?.enabled = false
+
+    def reobfShadowJarTask = tasks.findByName('reobfShadowJar')
+    reobfShadowJarTask?.dependsOn shadowJar
+    if (reobfShadowJarTask != null) {
+        tasks.build.dependsOn reobfShadowJarTask
+    }
+}
 
 // Use shadowJar as the main artifact
 tasks.assemble.dependsOn tasks.shadowJar
