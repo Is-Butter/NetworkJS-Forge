@@ -18,10 +18,10 @@ jobs:
           fetch-depth: 0  # Fetch full history for changelog generation
           fetch-tags: true
 
-      - name: Setup JDK 21
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17'
           distribution: 'temurin'
 
       - name: Setup Gradle
@@ -96,9 +96,9 @@ jobs:
             3. Make sure you have KubeJS installed
             
             ## Compatibility
-            - Minecraft: 1.21.1
-            - NeoForge: 21.1.200+
-            - KubeJS: 2101.7.1-build.181+
+            - Minecraft: 1.20.1
+            - Forge: 47.3.0+
+            - KubeJS: 2001.6.5+
           draft: false
           prerelease: false
 
