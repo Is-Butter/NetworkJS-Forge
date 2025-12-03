@@ -184,9 +184,9 @@ ServerEvents.loaded(event => {
 
 ## Requirements
 
-- Minecraft 1.21.1
-- NeoForge 21.1.200+
-- KubeJS 2101.7.1+
+- Minecraft 1.20.1
+- Forge 47.3.0+
+- KubeJS 2001.6.5+
 
 ## Building
 
@@ -196,7 +196,7 @@ cd NetworkJS
 ./gradlew build
 ```
 
-The built jar will be in `build/libs/networkjs-1.21.1-{version}.jar`
+The built jar will be in `build/libs/networkjs-1.20.1-{version}.jar`
 
 ## License
 
