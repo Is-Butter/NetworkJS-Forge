@@ -1,16 +1,16 @@
 # NetworkJS
 
-A powerful KubeJS addon that enables internet connectivity and Discord integration for your Minecraft server scripts.
+A powerful KubeJS addon that enables internet connectivity for your Minecraft server scripts.
 
 > **Note**: This is my first Java mod! I'm still learning, so feedback and contributions are very welcome. :D
 
 ## Features
 
-- **HTTP/FETCH Support** - Make HTTP requests from your KubeJS scripts
-- **Discord Bot Integration** - Send messages, embeds, and listen to Discord events
-- **Server Utilities** - Send colored messages to players and get server info
-- **Easy Integration** - Works seamlessly with KubeJS with both global functions and class access
-- **Safety System** - Registry system prevents accidental network access in singleplayer
+- **HTTP/FETCH Support** - Make HTTP(S) requests from your KubeJS scripts with synchronous or async calls
+- **Server Utilities** - Send colored messages to players and gather server info without extra addons
+- **Easy Integration** - Works seamlessly with KubeJS using both global functions and class access
+- **Always-On Access** - Network helpers are available immediately without commands, toggles, or registry steps
+- **Configurable Logging** - Verbose logging can be toggled in config or via the `/networkjs logging` command
 
 ## Installation
 
@@ -19,149 +19,100 @@ A powerful KubeJS addon that enables internet connectivity and Discord integrati
 3. Make sure you have [KubeJS](https://github.com/KubeJS-Mods/KubeJS) installed
 4. Restart your server
 
-## Safety & Registry System
-
-NetworkJS includes a safety system to prevent accidental network access:
-
-### Singleplayer Detection
-- When running in singleplayer mode, NetworkJS automatically disables all network features
-- A warning message appears in chat explaining how to enable the registry
-- This prevents accidental API calls or Discord connections in singleplayer
-
-### Registry Commands
-Use these commands to manage the NetworkJS registry (requires OP level 2):
-
-```bash
-/networkjs enable    # Enable the registry and reload KubeJS scripts
-/networkjs disable   # Disable the registry
-/networkjs reload    # Force reload bindings (when registry is enabled)
-/networkjs status    # Check current registry status
-```
-
-### Workflow
-1. **Server starts** → Registry is disabled by default in singleplayer
-2. **Warning appears** → Chat message explains the situation
-3. **Run command** → `/networkjs enable` to enable features
-4. **Scripts reload** → KubeJS server-scripts reload with new bindings
-5. **Features available** → All NetworkJS features are now accessible
-
 ## API Reference
 
-### Global Functions (New!)
+NetworkJS exposes the same helpers as both global functions and legacy classes, so you can choose the style that best fits your KubeJS scripts.
+
+### Global Functions
 
 ```javascript
-// HTTP Requests - Now available as global functions!
-fetch('https://api.example.com/data')
-fetchAsync('https://api.example.com/data', { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'application/json' },
+// Quick GET
+const response = fetch('https://api.example.com/data');
+
+// POST/PUT/PATCH/DELETE with options
+const created = fetch('https://api.example.com/data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer token' },
     body: JSON.stringify({ key: 'value' })
-})
-```
-
-### Global Classes
-
-#### `DiscordBot` - Discord Integration
-```javascript
-const config = {
-    token: "your-bot-token",
-    guild: "your-guild-id", 
-    channels: {
-        chat: "channel-id",
-        announcements: "channel-id"
-    },
-    sanitizeMessages: true
-};
-
-const bot = new DiscordBot(config);
-
-// Send messages
-bot.sendMessage("chat", "Hello from Minecraft!");
-
-// Send embeds
-bot.sendEmbed("announcements", {
-    title: "Server Status",
-    description: "Server is online!",
-    color: 0x00ff00
 });
 
-// Listen for Discord messages
-bot.onMessage(function(discordMessage) {
-    console.log("Message from " + discordMessage.getAuthor() + ": " + discordMessage.getContent());
+// Async variant returns a CompletableFuture<FetchResponse>
+fetchAsync('https://api.example.com/data', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled: true })
+}).then(response => {
+    console.log('Status', response.getStatus());
 });
-
-// Set bot activity
-bot.setActivity("Minecraft Server Online");
 ```
 
-#### `Server` - Minecraft Server Utilities
+#### Fetch options (object)
+
+- `method` – HTTP verb (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`, or any valid method). Defaults to `GET`.
+- `headers` – Map/object of header key/value pairs. `Content-Type` is auto-detected from the header when present (defaults to `application/json`).
+- `body` – Any value that can be stringified; used as the request body when the method accepts one.
+
+#### Fetch response helpers
+
+- `getStatus()` / `status` – Numeric HTTP status code.
+- `getStatusText()` – Status text message.
+- `isOk()` – `true` when the request returned a 2xx status.
+- `getHeaders()` – Map of response headers.
+- `getText()` / `text()` – Response body as a string.
+- `json()` – Parse the body into a JSON element (throws if invalid JSON).
+- `json(Class<T>)` – Parse directly into a typed object.
+
+### Server utilities (global class `Server`)
+
 ```javascript
-// Send colored messages to all players
-Server.sendRawMessage("&aWelcome to the server!");
+// Broadcast a colored message to everyone
+Server.sendRawMessage('&aWelcome to the server!');
 
-// Send message to specific player
-Server.sendRawMessageToPlayer("PlayerName", "&bHello there!");
+// Direct message a single player by name
+Server.sendRawMessageToPlayer('PlayerName', '&bHello there!');
 
-// Get server info
+// Query server state
 const playerCount = Server.getPlayerCount();
-const playerNames = Server.getPlayerNames(); // Returns array of strings
+const playerNames = Server.getPlayerNames(); // returns string[]
 ```
 
-#### `FetchBinding` - HTTP Requests (Legacy)
+### Legacy classes (still available)
+
 ```javascript
-// You can still use the class-based approach
-const response = FetchBinding.fetch("https://api.example.com");
-console.log("Status:", response.getStatus());
-console.log("Response:", response.text());
+// Class-based synchronous fetch
+const response = FetchBinding.fetch('https://api.example.com');
+console.log('Status:', response.getStatus());
+console.log('Body:', response.text());
 
-// With options
-const options = new FetchOptions("POST", {"Content-Type": "application/json"}, '{"data": "value"}');
-const response = FetchBinding.fetch("https://api.example.com", options);
+// Explicit options with typed helper
+const options = new FetchOptions('POST', { 'Content-Type': 'application/json' }, JSON.stringify({ data: 'value' }));
+const created = FetchBinding.fetch('https://api.example.com', options);
 
-// Async requests
-const futureResponse = FetchBinding.fetchAsync("https://api.example.com");
+// Async using CompletableFuture
+const future = FetchBinding.fetchAsync('https://api.example.com');
+future.thenApply(resp => resp.json());
 ```
 
 ### Complete API Exports
 
-The following classes and functions are available globally in your KubeJS scripts (when registry is enabled):
+The following classes and functions are available globally in your KubeJS scripts:
 
 | Export | Type | Description |
 |--------|------|-------------|
-| `fetch()` | Function | Make HTTP requests (global function) |
-| `fetchAsync()` | Function | Make async HTTP requests (global function) |
-| `DiscordBot` | Class | Discord bot functionality |
-| `Server` | Class | Server utilities |
-| `FetchBinding` | Class | HTTP request utilities (legacy) |
-| `FetchOptions` | Class | HTTP request options |
-| `FetchResponse` | Class | HTTP response object |
+| `fetch()` | Function | Perform synchronous HTTP/HTTPS requests |
+| `fetchAsync()` | Function | Perform asynchronous HTTP/HTTPS requests |
+| `Server` | Class | Broadcast messages and query server state |
+| `FetchBinding` | Class | Legacy fetch wrapper (sync/async) |
+| `FetchOptions` | Class | Options bag for HTTP method/headers/body |
+| `FetchResponse` | Class | Response wrapper with text/json helpers |
+
+## Configuration & Commands
+
+- **Logging toggle**: `config/networkjs-common.toml` contains `enableLogging` (default `true`) to turn verbose logs on or off.
+- **Status command**: `/networkjs status` (op level 2) reports network availability and current logging mode.
+- **Runtime logging toggle**: `/networkjs logging enable|disable` flips `enableLogging` without restarting and saves it back to the config file.
 
 ## Example Usage
-
-### Discord-Minecraft Bridge
-```javascript
-const discordConfig = {
-    token: "your-bot-token",
-    guild: "your-guild-id",
-    channels: { chat: "chat-channel-id" }
-};
-
-const bot = new DiscordBot(discordConfig);
-
-// Relay Discord messages to Minecraft
-bot.onMessage(function(msg) {
-    if (msg.isFromConfiguredChannel() && !msg.isBot()) {
-        Server.sendRawMessage(`&7[Discord] &f${msg.getAuthor()}: ${msg.getContent()}`);
-    }
-});
-
-// Relay Minecraft chat to Discord
-PlayerEvents.chat(event => {
-    const playerName = event.player.name.getString();
-    const message = event.message;
-    bot.sendMessage("chat", `**${playerName}**: ${message}`);
-});
-```
 
 ### Server Status API
 ```javascript
