@@ -186,7 +186,7 @@ ServerEvents.loaded(event => {
 
 - Minecraft 1.20.1
 - Forge 47.3.0+
-- KubeJS 2001.6.5+
+- KubeJS 2001.6.5-build.20+
 
 ## Building
 
