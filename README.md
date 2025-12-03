@@ -198,6 +198,26 @@ cd NetworkJS
 
 The built jar will be in `build/libs/networkjs-1.20.1-{version}.jar`
 
+## Releasing
+
+Automated releases are published through GitHub Actions whenever a version tag that begins with `r` is pushed (for example, `r1.0.0`). Follow these steps to cut a new release:
+
+1. Update `gradle.properties` with the new `mod_version` value if it changed.
+2. Build locally with `./gradlew build` and verify the artifact in `build/libs`.
+3. Create a tag that starts with `r` and push it to GitHub:
+
+   ```bash
+   git tag r1.0.0
+   git push origin r1.0.0
+   ```
+
+4. The workflow `.github/workflows/release.yml` will run automatically to:
+   - Build the project on GitHub Actions.
+   - Generate the changelog from commits since the previous tag.
+   - Publish a GitHub Release and upload the built JAR from `build/libs`.
+
+The Release page will contain the changelog and the compiled mod ready for download.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
