@@ -153,10 +153,11 @@ def validateModMetadata = tasks.register("validateModMetadata") {
         def content = modsToml.text
         def missingMandatory = []
 
-        content.split(/\[\[dependencies\./).drop(1).each { block ->
-            def dependencyBlock = "[[dependencies.${block}"
-            if (!dependencyBlock.contains("mandatory")) {
-                missingMandatory << dependencyBlock
+        def matcher = content =~ /\[\[dependencies\.([^]]+)\]\][^\[]*/
+        matcher.each { fullMatch, modId ->
+            def block = fullMatch as String
+            if (!(block =~ /(?m)^\s*mandatory\s*=\s*(true|false)/)) {
+                missingMandatory << "dependencies.${modId}"
             }
         }
 
