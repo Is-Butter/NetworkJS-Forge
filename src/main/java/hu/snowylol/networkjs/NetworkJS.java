@@ -3,10 +3,9 @@ package hu.snowylol.networkjs;
 import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
